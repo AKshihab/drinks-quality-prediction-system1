@@ -1,1 +1,49 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Drinks Quality Prediction System</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <main class="auth-page">
+        <section class="auth-card">
+            <div class="auth-logo">DQ</div>
+
+            <div class="auth-header">
+                <p class="tagline">Create Profile</p>
+                <h1>Register</h1>
+                <p>Create an account to use the prediction dashboard.</p>
+            </div>
+
+            <form class="auth-form" action="/dashboard" method="GET">
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" id="full_name" name="full_name" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create password" required>
+                </div>
+
+                <button type="submit" class="primary-btn full-width">Register</button>
+            </form>
+
+            <p class="auth-link">
+                Already have an account?
+                <a href="/">Login Here</a>
+            </p>
+        </section>
+    </main>
+</body>
+</html>
