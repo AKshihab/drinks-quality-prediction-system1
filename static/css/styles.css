@@ -433,12 +433,42 @@ a {
 
 .form-group input.invalid {
     border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(217, 48, 37, 0.12);
+}
+
+.form-group input.valid {
+    border-color: var(--success);
+    box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.12);
 }
 
 .error-message {
     min-height: 18px;
     font-size: 0.8rem;
     color: var(--danger);
+}
+
+.password-strength p {
+    margin: 0.35rem 0 0;
+}
+
+.password-strength-bar {
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: var(--border);
+    transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.password-strength-bar.weak {
+    background: var(--danger);
+}
+
+.password-strength-bar.moderate {
+    background: #d97706;
+}
+
+.password-strength-bar.strong {
+    background: var(--success);
 }
 
 .form-actions {
@@ -565,6 +595,15 @@ a {
     gap: 0.8rem;
     justify-content: center;
     margin-top: 1.5rem;
+}
+
+.result-nav {
+    position: static;
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    border: 0;
+    background: transparent;
 }
 
 /* ============================= */
