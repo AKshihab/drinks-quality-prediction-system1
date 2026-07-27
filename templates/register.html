@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Drinks Quality Prediction System</title>
 
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
 </head>
 
 <body>
     <main class="auth-page">
-        <section class="auth-card">
+        <section class="auth-card w-full max-w-md">
             <div class="auth-logo">DQ</div>
 
             <div class="auth-header">
@@ -20,23 +21,33 @@
                 <p>Create an account to use the prediction dashboard.</p>
             </div>
 
-            <form class="auth-form" action="/dashboard" method="GET">
+            <form class="auth-form gap-4" id="registrationForm" action="/dashboard" method="GET" novalidate>
                 <div class="form-group">
                     <label for="full_name">Full Name</label>
-                    <input type="text" id="full_name" name="full_name" placeholder="Enter your full name" required>
+                    <input type="text" id="full_name" name="full_name" placeholder="Enter your full name" autocomplete="name" aria-describedby="fullNameError" required>
+                    <small id="fullNameError" class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
+                    <input type="email" id="email" name="email" placeholder="example@gmail.com" autocomplete="email" aria-describedby="emailError" required>
+                    <small id="emailError" class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Create password" required>
+                    <input type="password" id="password" name="password" placeholder="Create password" autocomplete="new-password" aria-describedby="passwordError passwordStrengthLabel" required>
+                    <small id="passwordError" class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
+
+                    <div class="password-strength mt-1">
+                        <div class="h-2 overflow-hidden rounded-full bg-gray-200">
+                            <div id="passwordStrengthBar" class="password-strength-bar empty"></div>
+                        </div>
+                        <p id="passwordStrengthLabel" class="mt-1 text-sm text-gray-600" aria-live="polite">Strength: Empty</p>
+                    </div>
                 </div>
 
-                <button type="submit" class="primary-btn full-width">Register</button>
+                <button type="submit" class="primary-btn full-width mt-2">Register</button>
             </form>
 
             <p class="auth-link">
