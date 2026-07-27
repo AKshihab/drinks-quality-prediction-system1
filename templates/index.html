@@ -8,8 +8,9 @@
 
     <title>Drinks Quality Prediction System</title>
 
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
 </head>
 
 <body>
@@ -20,7 +21,7 @@
                 <span>Drinks Quality Prediction</span>
             </a>
 
-            <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu">
+            <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-controls="appNav" aria-expanded="false">
                 ☰
             </button>
 
@@ -69,22 +70,7 @@
         </section>
 
         <section class="stats-section">
-            <div class="container stats-grid">
-                <article class="stat-card">
-                    <h3>Model Type</h3>
-                    <p>ElasticNet Regression</p>
-                </article>
-
-                <article class="stat-card">
-                    <h3>Input Type</h3>
-                    <p>Physicochemical Values</p>
-                </article>
-
-                <article class="stat-card">
-                    <h3>Output</h3>
-                    <p>Predicted Quality Score</p>
-                </article>
-            </div>
+            <div id="statsContainer" class="container stats-grid grid grid-cols-1 gap-4 md:grid-cols-3"></div>
         </section>
 
         <section class="prediction-section" id="prediction">
@@ -98,77 +84,77 @@
                     </p>
                 </div>
 
-                <form class="prediction-form" id="predictionForm" action="/predict" method="POST" novalidate>
+                <form class="prediction-form grid grid-cols-1 gap-4 md:grid-cols-2" id="predictionForm" action="/predict" method="POST" novalidate>
                     <div class="form-group">
                         <label for="fixed_acidity">Fixed Acidity</label>
-                        <input type="number" step="any" id="fixed_acidity" name="fixed_acidity" placeholder="Example: 7.4" required>
-                        <small class="error-message"></small>
+                        <input type="number" step="any" min="0" id="fixed_acidity" name="fixed_acidity" placeholder="Example: 7.4" required>
+                        <small class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="volatile_acidity">Volatile Acidity</label>
-                        <input type="number" step="any" id="volatile_acidity" name="volatile_acidity" placeholder="Example: 0.70" required>
-                        <small class="error-message"></small>
+                        <input type="number" step="any" min="0" id="volatile_acidity" name="volatile_acidity" placeholder="Example: 0.70" required>
+                        <small class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="citric_acid">Citric Acid</label>
-                        <input type="number" step="any" id="citric_acid" name="citric_acid" placeholder="Example: 0.00" required>
-                        <small class="error-message"></small>
+                        <input type="number" step="any" min="0" id="citric_acid" name="citric_acid" placeholder="Example: 0.00" required>
+                        <small class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="residual_sugar">Residual Sugar</label>
-                        <input type="number" step="any" id="residual_sugar" name="residual_sugar" placeholder="Example: 1.9" required>
-                        <small class="error-message"></small>
+                        <input type="number" step="any" min="0" id="residual_sugar" name="residual_sugar" placeholder="Example: 1.9" required>
+                        <small class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="chlorides">Chlorides</label>
-                        <input type="number" step="any" id="chlorides" name="chlorides" placeholder="Example: 0.076" required>
-                        <small class="error-message"></small>
+                        <input type="number" step="any" min="0" id="chlorides" name="chlorides" placeholder="Example: 0.076" required>
+                        <small class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="free_sulfur_dioxide">Free Sulfur Dioxide</label>
-                        <input type="number" step="any" id="free_sulfur_dioxide" name="free_sulfur_dioxide" placeholder="Example: 11" required>
-                        <small class="error-message"></small>
+                        <input type="number" step="any" min="0" id="free_sulfur_dioxide" name="free_sulfur_dioxide" placeholder="Example: 11" required>
+                        <small class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="total_sulfur_dioxide">Total Sulfur Dioxide</label>
-                        <input type="number" step="any" id="total_sulfur_dioxide" name="total_sulfur_dioxide" placeholder="Example: 34" required>
-                        <small class="error-message"></small>
+                        <input type="number" step="any" min="0" id="total_sulfur_dioxide" name="total_sulfur_dioxide" placeholder="Example: 34" required>
+                        <small class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="density">Density</label>
-                        <input type="number" step="any" id="density" name="density" placeholder="Example: 0.9978" required>
-                        <small class="error-message"></small>
+                        <input type="number" step="any" min="0" id="density" name="density" placeholder="Example: 0.9978" required>
+                        <small class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="pH">pH</label>
-                        <input type="number" step="any" id="pH" name="pH" placeholder="Example: 3.51" required>
-                        <small class="error-message"></small>
+                        <input type="number" step="any" min="0" id="pH" name="pH" placeholder="Example: 3.51" required>
+                        <small class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="sulphates">Sulphates</label>
-                        <input type="number" step="any" id="sulphates" name="sulphates" placeholder="Example: 0.56" required>
-                        <small class="error-message"></small>
+                        <input type="number" step="any" min="0" id="sulphates" name="sulphates" placeholder="Example: 0.56" required>
+                        <small class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                     </div>
 
                     <div class="form-group">
                         <label for="alcohol">Alcohol</label>
-                        <input type="number" step="any" id="alcohol" name="alcohol" placeholder="Example: 9.4" required>
-                        <small class="error-message"></small>
+                        <input type="number" step="any" min="0" id="alcohol" name="alcohol" placeholder="Example: 9.4" required>
+                        <small class="error-message min-h-5 text-sm text-red-600" aria-live="polite"></small>
                     </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="primary-btn">Predict Quality</button>
-                        <button type="button" class="secondary-btn" id="sampleDataBtn">Use Sample Data</button>
-                        <button type="reset" class="clear-btn">Clear</button>
+                    <div class="form-actions gap-3 md:col-span-2">
+                        <button type="submit" class="primary-btn w-full sm:w-auto">Predict Quality</button>
+                        <button type="button" class="secondary-btn w-full sm:w-auto" id="sampleDataBtn">Use Sample Data</button>
+                        <button type="reset" class="clear-btn w-full sm:w-auto">Clear</button>
                     </div>
                 </form>
             </div>
