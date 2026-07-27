@@ -8,18 +8,19 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
-</head>   
+</head>
+
 <body>
     <header class="app-header">
         <div class="container header-content">
-            <a href="/" class="brand">
+            <a href="/dashboard" class="brand">
                 <span class="brand-icon">DQ</span>
                 <span>Drinks Quality Prediction</span>
             </a>
 
             <nav class="app-nav result-nav">
-                <a href="/">Home</a>
-                <a href="/#prediction">Predict Again</a>
+                <a href="/dashboard">Home</a>
+                <a href="/dashboard#prediction">Predict Again</a>
             </nav>
         </div>
     </header>
@@ -51,8 +52,8 @@
                 </p>
 
                 <div class="result-actions">
-                    <a href="/" class="primary-btn">Back to Home</a>
-                    <a href="/#prediction" class="secondary-btn">Make Another Prediction</a>
+                    <a href="/dashboard" class="primary-btn">Back to Dashboard</a>
+                    <a href="/dashboard#prediction" class="secondary-btn">Make Another Prediction</a>
                 </div>
             </div>
         </section>
