@@ -1,0 +1,19 @@
+TEST REPORT
+===========
+
+Passed checks:
+- All 11 PHP files passed php -l syntax validation.
+- JavaScript passed node --check syntax validation.
+- The seeded demo password hash verifies DemoUser123! correctly.
+- login.php returned HTTP 200.
+- index.php redirected unauthenticated visitors to login.php.
+- dashboard.php redirected unauthenticated visitors to login.php.
+- A simulated valid session displayed the user's name, email, and Logout button.
+- POST logout with a valid CSRF token destroyed the session.
+- dashboard.php redirected to login.php after logout.
+- No PHP fatal errors or warnings were produced in the page/session tests.
+
+Environment limitation:
+- This build environment did not contain the PDO MySQL driver or a MySQL server, so the
+  actual database INSERT/SELECT flow must be verified in XAMPP. The included code uses
+  standard XAMPP PHP PDO MySQL settings and prepared statements.

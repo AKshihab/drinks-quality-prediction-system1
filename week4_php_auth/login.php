@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if (isset($_SESSION['user_email'])) {
+if (isset($_SESSION['user_id'], $_SESSION['user_email'])) {
     header('Location: dashboard.php');
     exit();
 }
@@ -10,8 +10,10 @@ $error_message = '';
 $status_message = trim($_GET['msg'] ?? '');
 $email = '';
 
+require_once __DIR__ . '/config/db.php';
+
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
-    $email = trim($_POST['email'] ?? '');
+    $email = strtolower(trim($_POST['email'] ?? ''));
     $password = $_POST['password'] ?? '';
 
     if ($email === '' || $password === '') {
@@ -20,23 +22,45 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $error_message = 'Please provide a valid email address.';
     } elseif (strlen($password) < 8) {
         $error_message = 'Password must contain at least 8 characters.';
+    } elseif (!$pdo instanceof PDO) {
+        $error_message = $database_connection_error !== ''
+            ? $database_connection_error
+            : 'The database is temporarily unavailable. Please try again later.';
     } else {
-        $mock_user_email = 'student@university.edu';
-        $mock_password_hash = password_hash('secureStudent123', PASSWORD_DEFAULT);
+        try {
+            $statement = $pdo->prepare(
+                'SELECT
+                    user_id,
+                    full_name,
+                    email,
+                    password_hash,
+                    role
+                 FROM users
+                 WHERE email = :email
+                 LIMIT 1'
+            );
+            $statement->execute(['email' => $email]);
+            $user = $statement->fetch();
 
-        if ($email === $mock_user_email && password_verify($password, $mock_password_hash)) {
-            session_regenerate_id(true);
+            if ($user && password_verify($password, $user['password_hash'])) {
+                session_regenerate_id(true);
 
-            $_SESSION['user_email'] = $email;
-            $_SESSION['user_role'] = 'Administrator';
-            $_SESSION['login_time'] = time();
-            $_SESSION['last_activity'] = time();
+                $_SESSION['user_id'] = (int) $user['user_id'];
+                $_SESSION['user_name'] = $user['full_name'];
+                $_SESSION['user_email'] = $user['email'];
+                $_SESSION['user_role'] = $user['role'];
+                $_SESSION['login_time'] = time();
+                $_SESSION['last_activity'] = time();
 
-            header('Location: dashboard.php');
-            exit();
+                header('Location: dashboard.php');
+                exit();
+            }
+
+            $error_message = 'Invalid email or password.';
+        } catch (PDOException $exception) {
+            error_log('Database login query failed: ' . $exception->getMessage());
+            $error_message = 'Unable to sign in right now. Please check that MySQL is running and try again.';
         }
-
-        $error_message = 'Invalid email or password.';
     }
 }
 ?>
@@ -52,7 +76,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     <main class="page-center">
         <section class="card auth-card">
             <h1>Drinks Quality Prediction System</h1>
-            <p class="subtitle">Week 4 secure login demonstration</p>
+            <p class="subtitle">Week 5 MySQL-backed secure login demonstration</p>
 
             <?php if ($status_message !== ''): ?>
                 <div class="message success" role="status">
@@ -63,6 +87,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             <?php if ($error_message !== ''): ?>
                 <div class="message error" role="alert">
                     <?php echo htmlspecialchars($error_message, ENT_QUOTES, 'UTF-8'); ?>
+                </div>
+            <?php elseif ($database_connection_error !== ''): ?>
+                <div class="message error database-message" role="alert">
+                    <?php echo htmlspecialchars($database_connection_error, ENT_QUOTES, 'UTF-8'); ?>
                 </div>
             <?php endif; ?>
 
