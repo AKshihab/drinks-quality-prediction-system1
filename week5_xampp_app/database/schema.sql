@@ -1,4 +1,4 @@
--- Week 5 unified XAMPP application database
+-- Week 5 unified XAMPP database, extended with the Week 6 profile field
 -- Import this complete file in phpMyAdmin.
 
 CREATE DATABASE IF NOT EXISTS drinks_quality_db
@@ -19,6 +19,7 @@ CREATE TABLE users (
     email VARCHAR(120) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('Admin', 'User') NOT NULL DEFAULT 'User',
+    bio TEXT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_users_email UNIQUE (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

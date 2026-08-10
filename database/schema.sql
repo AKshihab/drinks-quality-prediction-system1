@@ -1,4 +1,4 @@
--- Drinks Quality Prediction System - Week 5 database schema
+-- Drinks Quality Prediction System - Week 5 schema with the Week 6 profile field
 -- Re-runnable MySQL/MariaDB script for phpMyAdmin and XAMPP.
 
 CREATE DATABASE IF NOT EXISTS drinks_quality_db
@@ -22,6 +22,7 @@ CREATE TABLE users (
     email VARCHAR(120) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('Admin', 'User') NOT NULL DEFAULT 'User',
+    bio TEXT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_users_email UNIQUE (email)
 ) ENGINE=InnoDB
