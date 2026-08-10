@@ -33,6 +33,7 @@ function render_header(string $title, string $active = ''): void
                 <a class="<?php echo $active === 'home' ? 'active-link' : ''; ?>" href="dashboard.php">Home</a>
                 <a href="dashboard.php#prediction">Prediction</a>
                 <a class="<?php echo $active === 'history' ? 'active-link' : ''; ?>" href="history.php">History</a>
+                <a class="<?php echo $active === 'profile' ? 'active-link' : ''; ?>" href="profile.php">Profile</a>
                 <a href="dashboard.php#about">About</a>
                 <span class="nav-user" title="<?php echo e($_SESSION['user_email']); ?>"><?php echo e($name); ?></span>
                 <form class="logout-form" action="logout.php" method="POST">
@@ -52,7 +53,7 @@ function render_footer(): void
 <footer class="app-footer">
     <div class="container">
         <p>&copy; 2026 Group 7 - Drinks Quality Prediction System</p>
-        <p>Software Development Project III | Week 5 PHP + MySQL Prototype</p>
+        <p>Software Development Project III | Week 6 Database Security Extension</p>
     </div>
 </footer>
 </body>
