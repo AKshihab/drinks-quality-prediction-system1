@@ -37,7 +37,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 redirect('dashboard.php');
             }
 
-            $error = 'Incorrect email or password. Register first or use the exact saved details.';
+            $error = 'Invalid email or password.';
         } catch (PDOException $exception) {
             error_log('Login query failed: ' . $exception->getMessage());
             $error = 'Login failed because the database could not be queried.';
