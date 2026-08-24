@@ -1,44 +1,42 @@
 # Drinks Quality Prediction System
 
-## How to Run
+The main website is the authenticated PHP/MySQL application in
+`week5_xampp_app/`. It calls a localhost Flask API, which loads the trained
+scikit-learn model and returns the real drink-quality class.
 
-### 1. Create a Conda Environment
+## Local setup
+
+1. Create and activate the Python environment, then install dependencies:
+
+   ```powershell
+   conda create -n mlproj python=3.10 -y
+   conda activate mlproj
+   pip install -r requirements.txt
+   ```
+
+2. To regenerate the model, run `python main.py`. Training explicitly excludes
+   the dataset row identifier `Id` and writes `model.pkl`,
+   `model_metadata.json`, and the evaluation scores under `artifacts/`.
+
+3. Start the local prediction API from the repository root:
+
+   ```powershell
+   python ml_api.py
+   ```
+
+   Confirm `http://127.0.0.1:5000/health` reports `"status": "ok"`.
+
+4. Copy `week5_xampp_app` to `C:\xampp\htdocs\week5_xampp_app`, start Apache
+   and MySQL, and follow [README_ML_INTEGRATION.md](README_ML_INTEGRATION.md) to
+   import the correct fresh schema or non-destructive upgrade scripts.
+
+5. Open `http://localhost/week5_xampp_app/`. The browser uses PHP; port 5000 is
+   the server-to-server model endpoint.
+
+The optional Streamlit interface uses the same prediction service and artifact:
 
 ```powershell
-conda create -n mlproj python=3.10 -y
+streamlit run app.py
 ```
 
-### 2. Activate the Environment
-
-```powershell
-conda activate mlproj
-```
-
-If the `mlproj` environment already exists, skip step 1.
-
-### 3. Install Requirements
-
-```powershell
-pip install -r requirements.txt
-```
-
-### 4. Start Flask
-
-```powershell
-python app.py
-```
-
-Open `http://127.0.0.1:5000` in a browser.
-An Internet connection is needed to load the Tailwind CSS CDN.
-
-## Pages to Test
-
-- Login: `http://127.0.0.1:5000/`
-- Register: `http://127.0.0.1:5000/register`
-- Dashboard: `http://127.0.0.1:5000/dashboard`
-
-On the dashboard, test empty and negative prediction values, the sample-data
-button, the clear button, and a valid prediction. On the registration page,
-test invalid email addresses and weak, moderate, and strong passwords. Also
-check both pages at a narrow mobile screen width and review the browser console
-for errors.
+Detailed Week 6 security verification remains in [README_WEEK6.md](README_WEEK6.md).

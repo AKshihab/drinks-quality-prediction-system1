@@ -55,6 +55,7 @@ class ConfigurationManager:
             root_dir=Path(config.root_dir),
             data_path=Path(config.data_path),
             target_column=self.schema.TARGET_COLUMN.name,
+            feature_columns=list(self.schema.FEATURE_COLUMNS),
             test_size=float(training.test_size),
             random_state=int(training.random_state),
         )
@@ -69,6 +70,9 @@ class ConfigurationManager:
             root_dir=Path(config.root_dir),
             train_data_path=Path(config.train_data_path),
             model_name=config.model_name,
+            metadata_name=config.metadata_name,
+            model_display_name=config.model_display_name,
+            model_version=str(config.model_version),
             target_column=config.target_column,
             validation_size=float(training.validation_size),
             random_state=int(training.random_state),

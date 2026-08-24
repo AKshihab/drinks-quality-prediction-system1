@@ -54,7 +54,7 @@ render_header('Prediction History', 'history');
         <?php else: ?>
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>ID</th><?php if ($isAdmin): ?><th>User</th><?php endif; ?><th>Sample</th><th>Fixed acidity</th><th>pH</th><th>Alcohol</th><th>Score</th><th>Label</th><th>Model</th><th>Date</th></tr></thead>
+                    <thead><tr><th>ID</th><?php if ($isAdmin): ?><th>User</th><?php endif; ?><th>Sample</th><th>Fixed acidity</th><th>pH</th><th>Alcohol</th><th>Quality</th><th>Label</th><th>Model</th><th>Date</th></tr></thead>
                     <tbody>
                     <?php foreach ($rows as $row): ?>
                         <tr>

@@ -2,9 +2,9 @@
 
 ## Verification status
 
-This Week 6 work extends the existing Week 5 PHP/MySQL application in `week5_xampp_app/`. It does not replace the Drinks Quality Prediction System, retrain the model, or create a separate application.
+This Week 6 work extends the existing Week 5 PHP/MySQL application in `week5_xampp_app/`. The security work remains intact, and the current application now sends prediction requests to the corrected trained Python model through a localhost Flask API. See `README_ML_INTEGRATION.md` for the model-service setup.
 
-The security implementation has been reviewed statically in the repository, and all 12 PHP files in the active XAMPP application pass `php -l` syntax validation. The local XAMPP PHP installation provides both `PDO` and `pdo_mysql`. At the time this guide was written, Apache and MySQL were stopped, so live database operations and browser behavior have **not** yet been claimed as passed. Complete the manual tests in this document before submission.
+The security and ML integration have been reviewed statically in the repository, and all 14 PHP files in the active XAMPP application pass `php -l` syntax validation. The local XAMPP PHP installation provides `PDO`, `pdo_mysql`, cURL, and JSON. At the time this guide was updated, Apache and MySQL were stopped, so live database operations and browser behavior have **not** yet been claimed as passed. Complete the manual tests in this document before submission.
 
 ## 1. Objective
 
@@ -30,7 +30,7 @@ The canonical browser URL after copying it into XAMPP is:
 http://localhost/week5_xampp_app/
 ```
 
-The Flask prototype at `http://127.0.0.1:5000` is separate and is not the Week 6 PHP security demonstration.
+The browser still uses the PHP application. `http://127.0.0.1:5000` is now a server-to-server prediction API; `/health` can be opened directly only to verify that the model is ready.
 
 ## 2. What Week 5 already had — PREVIOUSLY IMPLEMENTED
 
@@ -66,7 +66,7 @@ Week 6 continues to use the existing:
 - five-minute inactivity timeout and role behavior;
 - dashboard, prediction, history, and logout flows;
 - shared navigation, CSS, and CSRF functions; and
-- existing Flask/ML files without retraining or replacing them.
+- the existing ML training pipeline, corrected to exclude the non-predictive dataset `Id` column.
 
 No duplicate login page, registration page, database connection, authentication helper, session system, or database was created.
 
@@ -82,6 +82,7 @@ No duplicate login page, registration page, database connection, authentication 
 | Profile and textarea styling | `week5_xampp_app/assets/styles.css` | Preserves the existing design language on desktop and mobile. |
 | Generic invalid-login response | `week5_xampp_app/login.php` | Returns `Invalid email or password.` without indicating whether an account exists. |
 | Week 6 setup and testing guide | `README_WEEK6.md` | Documents implementation, migration, expected results, and submission steps. |
+| Trained-model API integration | `ml_api.py` and the PHP ML client | Replaces the demonstration formula with the corrected 11-feature model while preserving PHP sessions and MySQL history. |
 
 The profile page also limits the bio to 1,000 UTF-8 characters, verifies the CSRF token, uses a POST/redirect/GET flow after an update, logs technical database exceptions internally, and shows safe browser-facing error messages.
 
@@ -144,7 +145,7 @@ $update->execute([
 ]);
 ```
 
-The active-model lookup in `predict.php` is a static query with no request or session value in its SQL text, so it does not require parameters merely for appearance. The Admin history clauses are also fixed application strings rather than user input.
+The active-model lookup in `predict.php` uses prepared model-name and version parameters returned by the local model API. The Admin history clauses are fixed application strings rather than user input.
 
 ## 7. SQL Injection mitigation
 
@@ -258,7 +259,7 @@ The Week 6 user schema is:
 
 ### Upgrade an existing Week 5 database
 
-If `drinks_quality_db` already contains registered users, samples, or predictions, import only:
+If `drinks_quality_db` already contains registered users, samples, or predictions, import the security migration if `users.bio` is absent:
 
 ```text
 C:\xampp\htdocs\week5_xampp_app\database\week6_security_update.sql
@@ -273,9 +274,15 @@ ALTER TABLE users
     ADD COLUMN IF NOT EXISTS bio TEXT NULL AFTER role;
 ```
 
-It preserves existing users, password hashes, samples, predictions, models, keys, and relationships. `IF NOT EXISTS` makes it safe to run again on the XAMPP MariaDB version used by this project.
+Then import the trained-model registration:
 
-> **Critical upgrade warning:** Do not re-import `week5_xampp_app/database/schema.sql` over an existing database. That full schema deliberately drops and recreates all four tables and will remove registered users and saved prediction history. If you are unsure whether data exists, treat the database as an upgrade and run only `week6_security_update.sql`.
+```text
+C:\xampp\htdocs\week5_xampp_app\database\ml_model_integration_update.sql
+```
+
+Both migrations preserve existing users, password hashes, samples, predictions, models, keys, and relationships. The model migration deactivates prototype models and idempotently activates `Drinks Quality Classifier` version `1.0` for new predictions.
+
+> **Critical upgrade warning:** Do not re-import `week5_xampp_app/database/schema.sql` over an existing database. That full schema deliberately drops and recreates all four tables and will remove registered users and saved prediction history. If you are unsure whether data exists, treat the database as an upgrade and run the two non-destructive migration files above.
 
 ### Create a fresh database
 
@@ -285,7 +292,7 @@ If this is a genuinely new installation and there is no data to preserve, import
 C:\xampp\htdocs\week5_xampp_app\database\schema.sql
 ```
 
-The updated fresh-install schema already creates `users.bio`, so do not run the migration afterward. It also creates the other three tables and seeds this Admin account:
+The updated fresh-install schema already creates `users.bio` and registers the trained model, so do not run either migration afterward. It also creates the other three tables and seeds this Admin account:
 
 ```text
 Email: demo@gmail.com
@@ -301,6 +308,10 @@ The repository-level `database/schema.sql` also contains `bio` for consistency, 
 
 - `week5_xampp_app/profile.php` — protected profile display and parameterized bio update.
 - `week5_xampp_app/database/week6_security_update.sql` — additive migration for existing Week 5 data.
+- `week5_xampp_app/database/ml_model_integration_update.sql` — non-destructively activates the trained-model registry row.
+- `week5_xampp_app/config/ml.php` and `week5_xampp_app/includes/ml_client.php` — central API settings and validated PHP cURL client.
+- `ml_api.py` and `src/mlproject/prediction_service.py` — localhost API and shared validated inference service.
+- `README_ML_INTEGRATION.md` — model installation, startup, and troubleshooting guide.
 - `README_WEEK6.md` — Week 6 implementation, setup, test, and submission guide.
 
 ### Files modified
@@ -310,6 +321,8 @@ The repository-level `database/schema.sql` also contains `bio` for consistency, 
 - `week5_xampp_app/includes/layout.php` — adds Profile navigation and identifies the Week 6 extension in the footer.
 - `week5_xampp_app/assets/styles.css` — adds integrated profile, textarea, and responsive styles.
 - `week5_xampp_app/login.php` — changes invalid authentication to the generic `Invalid email or password.` message.
+- `week5_xampp_app/predict.php` — calls the trained Python model before saving an atomic database transaction.
+- `week5_xampp_app/dashboard.php` and `week5_xampp_app/assets/app.js` — use the real 11-feature contract and trained-model wording.
 
 ### Important files reused without replacement
 
@@ -318,9 +331,6 @@ The repository-level `database/schema.sql` also contains `bio` for consistency, 
 - `week5_xampp_app/includes/auth.php`
 - `week5_xampp_app/register.php`
 - `week5_xampp_app/logout.php`
-- `week5_xampp_app/dashboard.php`
-- `week5_xampp_app/predict.php`
-- `week5_xampp_app/history.php`
 
 ## 14. How to run on Windows with XAMPP
 
@@ -383,6 +393,8 @@ For an **existing Week 5 database with data**:
 4. Select `C:\xampp\htdocs\week5_xampp_app\database\week6_security_update.sql`.
 5. Click **Go**.
 6. Open `users` → **Structure** and confirm a nullable `bio` column appears after `role`.
+7. Import `C:\xampp\htdocs\week5_xampp_app\database\ml_model_integration_update.sql`.
+8. Open `models` → **Browse** and confirm `Drinks Quality Classifier` version `1.0` is active.
 
 For a **genuinely fresh installation with nothing to preserve**:
 
@@ -390,9 +402,21 @@ For a **genuinely fresh installation with nothing to preserve**:
 2. Select `C:\xampp\htdocs\week5_xampp_app\database\schema.sql`.
 3. Click **Go**.
 4. Confirm `drinks_quality_db` contains `users`, `models`, `drink_samples`, and `predictions`.
-5. Do not run the Week 6 migration because the fresh schema already contains `bio`.
+5. Do not run either migration because the fresh schema already contains `bio` and the trained-model record.
 
-### Step 5 — Open the application
+### Step 5 — Start the trained-model API
+
+Open a separate PowerShell terminal and keep this command running:
+
+```powershell
+Set-Location "C:\Users\shiha\ML-Projects\drinks-quality-prediction-system1"
+conda activate mlproj
+python ml_api.py
+```
+
+Open `http://127.0.0.1:5000/health` and confirm it returns `"status": "ok"`.
+
+### Step 6 — Open the application
 
 Open:
 
@@ -410,7 +434,7 @@ http://localhost/week5_xampp_app/profile.php
 http://localhost/week5_xampp_app/history.php
 ```
 
-Do not open PHP files with `file:///`, VS Code Live Server, or Flask port 5000. PHP must execute through XAMPP Apache.
+Do not open PHP files with `file:///`, VS Code Live Server, or Flask port 5000. PHP executes through XAMPP Apache; Flask port 5000 is only the local prediction API.
 
 ### Optional PHP syntax and PDO checks
 
@@ -620,7 +644,7 @@ Run the tests in order. Use a private/incognito browser window if an old session
 
 4. Click **Predict and Save**.
 
-**Expected result:** The result page shows prototype score `4.92` and label `Poor`, along with a new prediction ID. A new row is stored in `drink_samples`, and a related row is stored in `predictions`. This is the existing PHP demonstration formula; Week 6 did not change or retrain prediction behavior.
+**Expected result:** The result page shows trained-model quality class `5` and label `Average`, along with a new prediction ID and `Drinks Quality Classifier` version `1.0`. A new row is stored in `drink_samples`, and a related row is stored in `predictions`.
 
 ### Test 12 — Existing prediction history
 
@@ -630,7 +654,7 @@ Run the tests in order. Use a private/incognito browser window if an old session
 2. Find the new prediction.
 3. In phpMyAdmin, inspect `drink_samples` and `predictions`.
 
-**Expected result:** The normal user sees the new `4.92` / `Poor` result, the sample values, model, and date. `predictions.sample_id` points to the new `drink_samples.sample_id`, and that sample's `user_id` points to the Week Six Test account. A normal user sees only history associated with that user's session ID.
+**Expected result:** The normal user sees the new `5` / `Average` result, the sample values, trained model, and date. `predictions.sample_id` points to the new `drink_samples.sample_id`, and that sample's `user_id` points to the Week Six Test account. A normal user sees only history associated with that user's session ID.
 
 ### Test 13 — Admin role behavior
 
@@ -665,7 +689,7 @@ Run the tests in order. Use a private/incognito browser window if an old session
 | 8. Profile update | Bio saves through POST and persists for the signed-in user. |
 | 9. XSS | No alert executes; script markup appears only as harmless text. |
 | 10. Session/logout | Logout and timeout remove protected access. |
-| 11. Prediction | Sample data produces `4.92` / `Poor` and saves a result. |
+| 11. Prediction | Sample data produces `5` / `Average` through the trained model and saves a result. |
 | 12. History | The saved result appears with correct user relationships and user scoping. |
 | 13. Admin | Admin sees all-user history; normal user remains limited to personal history. |
 
@@ -693,7 +717,9 @@ Do not mark a browser/database result as passed merely because the source code l
 | Parameterized profile `UPDATE` | Added in Week 6; persistence test pending | `week5_xampp_app/profile.php` |
 | `htmlspecialchars()` escaping | Implemented through shared `e()`; XSS browser test pending | `week5_xampp_app/config/app.php` and output sites |
 | Additive `bio` migration | Added; live import pending | `week5_xampp_app/database/week6_security_update.sql` |
+| Trained-model integration migration | Added; live import pending | `week5_xampp_app/database/ml_model_integration_update.sql` |
 | Fresh schema includes `bio` | Added in both schema copies | Both `database/schema.sql` files |
+| Corrected 11-feature model API | Implemented; live XAMPP test pending | `ml_api.py`, prediction service, and PHP ML client |
 | Week 6 documentation | Completed | `README_WEEK6.md` |
 
 ### Student submission checklist
@@ -701,6 +727,7 @@ Do not mark a browser/database result as passed merely because the source code l
 - [ ] Apache starts in XAMPP.
 - [ ] MySQL starts in XAMPP.
 - [ ] Correct upgrade migration or fresh schema path was used.
+- [ ] Existing databases received `ml_model_integration_update.sql`.
 - [ ] Existing data was backed up before any destructive fresh-schema import.
 - [ ] PDO connection works.
 - [ ] `PDO::ERRMODE_EXCEPTION` is enabled.
@@ -720,10 +747,10 @@ Do not mark a browser/database result as passed merely because the source code l
 - [ ] Profile bio update persists.
 - [ ] XSS payload does not execute.
 - [ ] Logout and inactivity timeout remove access.
-- [ ] Existing prediction produces `4.92` / `Poor` for sample data.
+- [ ] Trained-model API reports healthy and sample data produces `5` / `Average`.
 - [ ] Existing prediction history still works.
 - [ ] Admin/user history restrictions still work.
-- [ ] Flask/ML files were not replaced or retrained.
+- [ ] The corrected model has exactly 11 measurement features and excludes `Id`.
 - [ ] `README_WEEK6.md` is complete.
 - [ ] `git status` and `git diff` were reviewed.
 - [ ] All manual results were recorded honestly.
@@ -745,7 +772,7 @@ git diff --check
 Review every changed and untracked file. If `git branch --show-current` still prints `main` and the manual tests pass, run:
 
 ```powershell
-git add README_WEEK6.md database/schema.sql week5_xampp_app
+git add README.md README_WEEK6.md README_ML_INTEGRATION.md app.py ml_api.py config params.yaml schema.yaml src tests artifacts/data_transformation/train.csv artifacts/data_transformation/test.csv artifacts/model_trainer/model.pkl artifacts/model_trainer/model_metadata.json artifacts/model_evaluation/scores.json database/schema.sql week5_xampp_app
 git status
 git diff --cached
 git commit -m "Complete Week 6 database security and profile integration"

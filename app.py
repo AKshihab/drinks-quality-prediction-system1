@@ -1,21 +1,24 @@
 from pathlib import Path
 
-from flask import app
-import joblib
-import numpy as np
 import pandas as pd
 import streamlit as st
+
+from mlproject.prediction_service import API_TO_MODEL_FEATURES, PredictionService
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 MODEL_PATH = PROJECT_ROOT / "artifacts" / "model_trainer" / "model.pkl"
+MODEL_METADATA_PATH = (
+    PROJECT_ROOT / "artifacts" / "model_trainer" / "model_metadata.json"
+)
 TRAIN_DATA_PATH = PROJECT_ROOT / "artifacts" / "data_transformation" / "train.csv"
-TARGET_COLUMN = "quality"
 
 
 @st.cache_resource
-def load_model(model_path: Path):
-    return joblib.load(model_path)
+def load_prediction_service(
+    model_path: Path, metadata_path: Path
+) -> PredictionService:
+    return PredictionService(model_path, metadata_path)
 
 
 @st.cache_data
@@ -35,7 +38,11 @@ def main() -> None:
         "predict its quality class."
     )
 
-    if not MODEL_PATH.is_file() or not TRAIN_DATA_PATH.is_file():
+    if (
+        not MODEL_PATH.is_file()
+        or not MODEL_METADATA_PATH.is_file()
+        or not TRAIN_DATA_PATH.is_file()
+    ):
         st.error(
             "The trained model is not available. Run `python main.py` before "
             "starting this application."
@@ -43,14 +50,15 @@ def main() -> None:
         st.stop()
 
     try:
-        model = load_model(MODEL_PATH)
+        prediction_service = load_prediction_service(
+            MODEL_PATH, MODEL_METADATA_PATH
+        )
         reference_data = load_reference_data(TRAIN_DATA_PATH)
     except Exception as error:
         st.error(f"Unable to load model artifacts: {error}")
         st.stop()
 
-    default_features = reference_data.drop(columns=[TARGET_COLUMN]).columns.tolist()
-    feature_names = list(getattr(model, "feature_names_in_", default_features))
+    feature_names = prediction_service.model_feature_names
 
     with st.form("prediction_form"):
         columns = st.columns(2)
@@ -78,28 +86,28 @@ def main() -> None:
         submitted = st.form_submit_button("Predict quality", type="primary")
 
     if submitted:
-        prediction_input = pd.DataFrame(
-            [[input_values[name] for name in feature_names]],
-            columns=feature_names,
-        )
+        api_values = {
+            api_name: input_values[model_name]
+            for api_name, model_name in API_TO_MODEL_FEATURES.items()
+        }
         try:
-            raw_prediction = float(model.predict(prediction_input)[0])
-            quality_values = reference_data[TARGET_COLUMN]
-            predicted_quality = int(
-                np.clip(
-                    np.rint(raw_prediction),
-                    quality_values.min(),
-                    quality_values.max(),
-                )
-            )
+            result = prediction_service.predict(api_values)
         except Exception as error:
             st.error(f"Prediction failed: {error}")
         else:
             st.success("Prediction completed")
-            st.metric("Predicted drink quality", predicted_quality)
+            st.metric(
+                "Predicted drink quality",
+                f"{result['predicted_quality']} ({result['quality_label']})",
+            )
 
-    st.caption(f"Model artifact: {MODEL_PATH.relative_to(PROJECT_ROOT)}")
+    model_info = prediction_service.model_info
+    st.caption(
+        f"{model_info['name']} v{model_info['version']} "
+        f"({model_info['algorithm']}) | "
+        f"Artifact: {MODEL_PATH.relative_to(PROJECT_ROOT)}"
+    )
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    main()

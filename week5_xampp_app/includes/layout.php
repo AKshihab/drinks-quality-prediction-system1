@@ -53,7 +53,7 @@ function render_footer(): void
 <footer class="app-footer">
     <div class="container">
         <p>&copy; 2026 Group 7 - Drinks Quality Prediction System</p>
-        <p>Software Development Project III | Week 6 Database Security Extension</p>
+        <p>Software Development Project III | Secure PHP + Trained Python ML</p>
     </div>
 </footer>
 </body>

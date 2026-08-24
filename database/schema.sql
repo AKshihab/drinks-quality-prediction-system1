@@ -98,7 +98,8 @@ INSERT INTO users (user_id, full_name, email, password_hash, role) VALUES
     (2, 'Nadia Rahman', 'nadia.rahman@example.com', '$2y$10$XMbjNf/so4/gcu.1qtqsOuRktp2Bcm6Tk4SChRMukcscQq.Gs/w0K', 'User'),
     (3, 'Farhan Ahmed', 'farhan.ahmed@example.com', '$2y$10$ovDCC/94KJy0AemGqiQh/.ziYF61sbxbRgR5uYXHpHH5c9.LDMktS', 'User');
 
--- Accuracy is NULL because no verified evaluation value is stored in the repository.
+-- Prototype rows remain for the seeded relational examples. Only the trained
+-- classifier is active for new application predictions.
 INSERT INTO models (
     model_id,
     model_name,
@@ -107,8 +108,9 @@ INSERT INTO models (
     accuracy,
     is_active
 ) VALUES
-    (1, 'ElasticNet Prototype', 'ElasticNet Regression', '1.0', NULL, TRUE),
-    (2, 'Random Forest Prototype', 'Random Forest Regression', '1.0', NULL, TRUE);
+    (1, 'ElasticNet Prototype', 'ElasticNet Regression', '1.0', NULL, FALSE),
+    (2, 'Random Forest Prototype', 'Random Forest Regression', '1.0', NULL, FALSE),
+    (3, 'Drinks Quality Classifier', 'LogisticRegressionCV', '1.0', 60.84, TRUE);
 
 INSERT INTO drink_samples (
     sample_id,

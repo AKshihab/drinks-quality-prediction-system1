@@ -77,7 +77,7 @@ if (predictionForm) {
             free_sulfur_dioxide: 11,
             total_sulfur_dioxide: 34,
             density: 0.9978,
-            pH: 3.51,
+            ph: 3.51,
             sulphates: 0.56,
             alcohol: 9.4
         };
@@ -223,9 +223,9 @@ if (registrationForm) {
 }
 
 const systemStats = [
-    { title: "Model Type", value: "ElasticNet Regression" },
+    { title: "Model Type", value: "LogisticRegressionCV" },
     { title: "Input Features", value: "Physicochemical Values" },
-    { title: "Output", value: "Quality Score" }
+    { title: "Output", value: "Quality Class" }
 ];
 
 function createStatCard(item) {

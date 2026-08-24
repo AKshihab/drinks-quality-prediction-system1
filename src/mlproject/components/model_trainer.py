@@ -11,6 +11,7 @@ from sklearn.preprocessing import StandardScaler
 
 from mlproject import logger
 from mlproject.entity.config_entity import ModelTrainerConfig
+from mlproject.utils.common import save_json
 
 
 class ModelTrainer:
@@ -122,7 +123,28 @@ class ModelTrainer:
 
         model_path = Path(self.config.root_dir) / self.config.model_name
         joblib.dump(selected_model, model_path)
+        metadata_path = Path(self.config.root_dir) / self.config.metadata_name
+        feature_ranges = {
+            column: {
+                "min": float(features[column].min()),
+                "max": float(features[column].max()),
+            }
+            for column in features.columns
+        }
+        save_json(
+            metadata_path,
+            {
+                "model_name": self.config.model_display_name,
+                "model_version": self.config.model_version,
+                "algorithm": selected_model_name,
+                "target_column": self.config.target_column,
+                "feature_names": features.columns.tolist(),
+                "feature_ranges": feature_ranges,
+                "classes": [int(value) for value in classes],
+            },
+        )
         logger.info("Selected model: %s", selected_model_name)
         logger.info("Saved model to %s", model_path)
+        logger.info("Saved model metadata to %s", metadata_path)
         logger.info("Model training completed")
         return selected_model_name

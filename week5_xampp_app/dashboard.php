@@ -66,7 +66,7 @@ render_header('Dashboard', 'home');
             <div class="section-heading">
                 <p class="tagline">Prediction Dashboard</p>
                 <h2>Enter Drink Feature Values</h2>
-                <p>The Week 5 prototype validates the inputs, stores the sample and result under your user account, and displays it in your history.</p>
+                <p>The trained Python model validates these measurements, predicts the quality class, and stores the sample and result under your account.</p>
             </div>
 
             <?php if ($database_connection_error !== ''): ?>
@@ -85,7 +85,7 @@ render_header('Dashboard', 'home');
                     'free_sulfur_dioxide' => ['Free Sulfur Dioxide', '11'],
                     'total_sulfur_dioxide' => ['Total Sulfur Dioxide', '34'],
                     'density' => ['Density', '0.9978'],
-                    'pH' => ['pH', '3.51'],
+                    'ph' => ['pH', '3.51'],
                     'sulphates' => ['Sulphates', '0.56'],
                     'alcohol' => ['Alcohol', '9.4'],
                 ];
@@ -115,15 +115,15 @@ render_header('Dashboard', 'home');
                 <article class="feature-card"><h3>Protected Website</h3><p>Directly opening dashboard.php without a valid session redirects the visitor to login.php.</p></article>
                 <article class="feature-card"><h3>Real Logout</h3><p>Logout destroys the session and prevents the protected website from opening through the Back button.</p></article>
                 <article class="feature-card"><h3>Separate User History</h3><p>Normal users see only predictions connected to their own user ID.</p></article>
-                <article class="feature-card"><h3>XAMPP Compatible</h3><p>The application uses Apache, PHP PDO, MySQL/MariaDB, and phpMyAdmin.</p></article>
+                <article class="feature-card"><h3>Trained ML Prediction</h3><p>PHP calls the local Python API, which loads the validated scikit-learn model artifact.</p></article>
             </div>
         </div>
     </section>
 
     <section class="about-section" id="about">
         <div class="container about-content">
-            <div><p class="tagline">About the Project</p><h2>Unified PHP/MySQL Main Website</h2><p>The previous Flask pages and separate PHP login did not share one session. This Week 5 application places login, registration, prediction, history, and logout inside one PHP application so authentication controls the real main website.</p></div>
-            <div class="about-box"><h3>Technology Stack</h3><p>PHP 8+, MySQL/MariaDB, PDO prepared statements, HTML, CSS, JavaScript, sessions, CSRF protection, and password hashing.</p></div>
+            <div><p class="tagline">About the Project</p><h2>PHP Website with Python ML Inference</h2><p>PHP controls authentication, forms, and MySQL history while a localhost Flask API performs inference with the trained model.</p></div>
+            <div class="about-box"><h3>Technology Stack</h3><p>PHP 8+, MySQL/MariaDB, Python, Flask, scikit-learn, PDO prepared statements, sessions, CSRF protection, HTML, CSS, and JavaScript.</p></div>
         </div>
     </section>
 </main>

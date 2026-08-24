@@ -14,6 +14,20 @@ class DataTransformation:
         data = pd.read_csv(self.config.data_path)
         logger.info("Input data shape: %s", data.shape)
 
+        required_columns = self.config.feature_columns + [self.config.target_column]
+        missing_columns = [
+            column for column in required_columns if column not in data.columns
+        ]
+        if missing_columns:
+            raise ValueError(
+                f"Data transformation is missing required columns: {missing_columns}"
+            )
+
+        # Keep only real measurements and the target. Dataset identifiers such as
+        # `Id` identify rows; they are not physical drink properties and must not
+        # become model features.
+        data = data.loc[:, required_columns].copy()
+
         train, test = train_test_split(
             data,
             test_size=self.config.test_size,

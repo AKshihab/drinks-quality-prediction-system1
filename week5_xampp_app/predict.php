@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/layout.php';
+require_once __DIR__ . '/includes/ml_client.php';
 require_once __DIR__ . '/config/db.php';
 require_login();
 
@@ -18,16 +19,28 @@ if (!verify_csrf()) {
 $fieldNames = [
     'fixed_acidity', 'volatile_acidity', 'citric_acid', 'residual_sugar',
     'chlorides', 'free_sulfur_dioxide', 'total_sulfur_dioxide', 'density',
-    'pH', 'sulphates', 'alcohol',
+    'ph', 'sulphates', 'alcohol',
 ];
 $values = [];
 foreach ($fieldNames as $field) {
-    $raw = trim((string) ($_POST[$field] ?? ''));
-    if ($raw === '' || !is_numeric($raw) || (float) $raw < 0) {
+    $submittedValue = $_POST[$field] ?? null;
+    if (!is_scalar($submittedValue)) {
         flash('error', 'Every prediction value must be a valid non-negative number.');
         redirect('dashboard.php#prediction');
     }
-    $values[$field] = (float) $raw;
+
+    $raw = trim((string) $submittedValue);
+    if ($raw === '' || !is_numeric($raw)) {
+        flash('error', 'Every prediction value must be a valid non-negative number.');
+        redirect('dashboard.php#prediction');
+    }
+
+    $numericValue = (float) $raw;
+    if (!is_finite($numericValue) || $numericValue < 0) {
+        flash('error', 'Every prediction value must be a valid non-negative number.');
+        redirect('dashboard.php#prediction');
+    }
+    $values[$field] = $numericValue;
 }
 
 if (!$pdo instanceof PDO) {
@@ -35,21 +48,17 @@ if (!$pdo instanceof PDO) {
     redirect('dashboard.php#prediction');
 }
 
-// Demonstration calculation for the Week 5 web/database prototype.
-// Replace this block with the trained Python model/API when the ML integration is ready.
-$score = 5.4
-    + (($values['alcohol'] - 10.0) * 0.28)
-    - (abs($values['volatile_acidity'] - 0.45) * 1.10)
-    + (($values['sulphates'] - 0.55) * 0.35)
-    - (abs($values['pH'] - 3.30) * 0.20)
-    - (max(0.0, $values['chlorides'] - 0.08) * 2.0);
-$score = max(3.0, min(8.5, round($score, 2)));
-$label = match (true) {
-    $score >= 7.0 => 'Excellent',
-    $score >= 6.0 => 'Good',
-    $score >= 5.0 => 'Average',
-    default => 'Poor',
-};
+try {
+    $modelResult = request_model_prediction($values);
+} catch (MlPredictionException $exception) {
+    error_log('Model prediction request failed: ' . $exception->getMessage());
+    flash('error', $exception->browserMessage());
+    redirect('dashboard.php#prediction');
+}
+
+$score = $modelResult['predicted_quality'];
+$label = $modelResult['quality_label'];
+$modelInfo = $modelResult['model'];
 
 try {
     $pdo->beginTransaction();
@@ -75,15 +84,30 @@ try {
         'free_sulfur_dioxide' => $values['free_sulfur_dioxide'],
         'total_sulfur_dioxide' => $values['total_sulfur_dioxide'],
         'density' => $values['density'],
-        'ph' => $values['pH'],
+        'ph' => $values['ph'],
         'sulphates' => $values['sulphates'],
         'alcohol' => $values['alcohol'],
     ]);
 
     $sampleId = (int) $pdo->lastInsertId();
-    $modelId = (int) $pdo->query('SELECT model_id FROM models WHERE is_active = 1 ORDER BY model_id LIMIT 1')->fetchColumn();
+    $modelStatement = $pdo->prepare(
+        'SELECT model_id
+         FROM models
+         WHERE model_name = :model_name
+           AND model_version = :model_version
+           AND is_active = 1
+         LIMIT 1'
+    );
+    $modelStatement->execute([
+        'model_name' => $modelInfo['name'],
+        'model_version' => $modelInfo['version'],
+    ]);
+    $modelId = (int) $modelStatement->fetchColumn();
     if ($modelId < 1) {
-        throw new RuntimeException('No active model record exists.');
+        throw new RuntimeException(
+            'No active database model matches '
+            . $modelInfo['name'] . ' v' . $modelInfo['version'] . '.'
+        );
     }
 
     $prediction = $pdo->prepare(
@@ -114,9 +138,9 @@ render_header('Prediction Result');
     <section class="result-section">
         <div class="container result-card">
             <p class="tagline">Prediction Saved</p>
-            <h1>Predicted Drink Quality Score</h1>
-            <div class="score-box"><span class="score-label">Prototype Quality Score</span><strong class="score-value"><?php echo e(number_format($score, 2)); ?></strong><span class="quality-badge"><?php echo e($label); ?></span></div>
-            <p class="result-note">Prediction ID: <?php echo $predictionId; ?>. This Week 5 version uses a demonstration formula and stores the result in MySQL. Connect the trained Python model later for the final ML score.</p>
+            <h1>Predicted Drink Quality</h1>
+            <div class="score-box"><span class="score-label">Predicted Quality Class</span><strong class="score-value"><?php echo e($score); ?></strong><span class="quality-badge"><?php echo e($label); ?></span></div>
+            <p class="result-note">Prediction ID: <?php echo $predictionId; ?>. Generated by <?php echo e($modelInfo['name']); ?> v<?php echo e($modelInfo['version']); ?> (<?php echo e($modelInfo['algorithm']); ?>) and saved in MySQL.</p>
             <div class="result-actions"><a href="dashboard.php#prediction" class="primary-btn">Make Another Prediction</a><a href="history.php" class="secondary-btn">View Saved History</a></div>
         </div>
     </section>

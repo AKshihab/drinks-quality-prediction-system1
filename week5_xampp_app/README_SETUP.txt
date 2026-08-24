@@ -32,8 +32,15 @@ INSTALLATION
 7. Select:
    C:\xampp\htdocs\week5_xampp_app\database\schema.sql
 8. Click Go and confirm that drinks_quality_db is created.
-9. Open:
+9. In a separate PowerShell terminal, open the repository root, activate the mlproj
+   Conda environment, and run: python ml_api.py
+10. Confirm http://127.0.0.1:5000/health reports status ok.
+11. Open:
    http://localhost/week5_xampp_app/
+
+If drinks_quality_db already contains users or history, do not import schema.sql.
+Import week6_security_update.sql if bio is missing, followed by
+ml_model_integration_update.sql. See README_ML_INTEGRATION.md in the repository.
 
 READY-MADE TEST ACCOUNT
 -----------------------
@@ -64,6 +71,8 @@ store readable passwords. PHP checks passwords using password_verify().
 COMMON PROBLEMS
 ---------------
 - "Database connection failed": Start MySQL and import schema.sql.
+- "Prediction service is unavailable": Start python ml_api.py from the repository.
+- "No active database model matches": Import ml_model_integration_update.sql.
 - Apache does not start: another program may be using port 80. Use XAMPP Config or stop it.
 - Page opens as file:///...: wrong method. Use http://localhost/week5_xampp_app/.
 - Unknown database: import database/schema.sql again.

@@ -26,6 +26,7 @@ class DataTransformationConfig:
     root_dir: Path
     data_path: Path
     target_column: str
+    feature_columns: list[str]
     test_size: float
     random_state: int
 
@@ -35,6 +36,9 @@ class ModelTrainerConfig:
     root_dir: Path
     train_data_path: Path
     model_name: str
+    metadata_name: str
+    model_display_name: str
+    model_version: str
     target_column: str
     validation_size: float
     random_state: int

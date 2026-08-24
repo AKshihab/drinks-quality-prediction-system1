@@ -77,4 +77,4 @@ INSERT INTO users (full_name, email, password_hash, role) VALUES
 ('Demo Administrator', 'demo@gmail.com', '$2y$12$7ecaDRsTbhArtLfrssJErO52hB7ZZ8H22eE96CD4B3jmy6DjWi9HK', 'Admin');
 
 INSERT INTO models (model_name, algorithm, model_version, accuracy, is_active) VALUES
-('Week 5 Prototype Model', 'Demonstration Formula', '1.0', NULL, TRUE);
+('Drinks Quality Classifier', 'LogisticRegressionCV', '1.0', 60.84, TRUE);
